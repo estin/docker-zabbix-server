@@ -31,7 +31,7 @@ Variables
 
 Linking:
 
-* `ZABBIX_DB_LINK=`: Database link name. Example: a value of "DB_PORT_3306" will fill in `ZABBIX_DB_HOST/PORT` variables
+* `ZABBIX_DB_LINK=`: Database link name. Example: a value of "DB_PORT_5432" will fill in `ZABBIX_DB_HOST/PORT` variables
 
 Constants in Dockerfile
 -----------------------
@@ -57,7 +57,7 @@ Install the required tables:
 
 Launch Zabbix container:
 
-    $ docker run -d --name="zabbix" --link zabbix-db:db -e ZABBIX_DB_LINK=DB_PORT_3306 -p 80:80 -p 10051:10051 alterrebe/zabbix-server
+    $ docker run -d --name="zabbix" --link zabbix-db:db -e ZABBIX_DB_LINK=DB_PORT_5432 -p 80:80 -p 10051:10051 alterrebe/zabbix-server
 
 By default, you sign in as Admin:zabbix.
 
