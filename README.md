@@ -8,7 +8,7 @@ Contains:
 * Nginx
 * PHP
 
-Processes are managed by supervisor, including cronjobs
+Processes are managed by supervisord, including cronjobs
 
 
 Exports
@@ -21,11 +21,11 @@ Exports
 Variables
 ---------
 
-* `ZABBIX_DB_NAME=zabbix`: Database name to work on
-* `ZABBIX_DB_USER=zabbix`: MySQL user
-* `ZABBIX_DB_PASS=zabbix`: MySQL password
-* `ZABBIX_DB_HOST=localhost`: MySQL host to connect to
-* `ZABBIX_DB_PORT=3306`: MySQL port
+* `ZABBIX_DB_NAME=zabbix`: PostgreSQL database to work on
+* `ZABBIX_DB_USER=zabbix`: PostgreSQL user/role
+* `ZABBIX_DB_PASS=zabbix`: The user password
+* `ZABBIX_DB_HOST=localhost`: PostgreSQL host to connect to
+* `ZABBIX_DB_PORT=5432`: PostgreSQL port
 
 * `ZABBIX_INSTALLATION_NAME=`: Zabbix installation name
 
@@ -41,17 +41,23 @@ Constants in Dockerfile
 Example
 -------
 
-Launch database container:
+Launch PostgreSQL database container with name 'zabbix-db'. Create the necessary user and database:
 
-    $ docker start zabbix-db || docker run --name="zabbix-db" -d -e MYSQL_ROOT_PASSWORD='root' -e MYSQL_DATABASE='zabbix' -e MYSQL_USER='zabbix' -e MYSQL_PASSWORD='zabbix' -e MYSQL_SET_KEYBUF=64M -p localhost::3306 -v /var/lib/mysql:/var/lib/mysql kolypto/mysql
+    $ docker run -d --name="zabbix-db" postgres
+    $ docker exec -it zabbix-db /bin/bash
+    ...$ psql -U postgres
+    postgres=# create user zabbix password 'zabbix';
+    postgres=# create database zabbix owner zabbix;
+    postgres=# Ctrl-D
+    ...$ Ctrl-D
 
 Install the required tables:
 
-    $ docker run --rm --link zabbix-db:db -e ZABBIX_DB_LINK=DB_PORT_3306 kolypto/zabbix-server /root/run.sh setup-db
+    $ docker run --rm --link zabbix-db:db -e ZABBIX_DB_LINK=DB_PORT_5432 alterrebe/zabbix-server /root/run.sh setup-db
 
 Launch Zabbix container:
 
-    $ docker start zabbix || docker run --name="zabbix" --link zabbix-db:db -e ZABBIX_DB_LINK=DB_PORT_3306 -p 80:80 -p 10051:10051 kolypto/zabbix-server
+    $ docker run -d --name="zabbix" --link zabbix-db:db -e ZABBIX_DB_LINK=DB_PORT_3306 -p 80:80 -p 10051:10051 alterrebe/zabbix-server
 
 By default, you sign in as Admin:zabbix.
 
@@ -66,7 +72,3 @@ Things to do at the beginning:
 * Administration > Media types: set up notification methods. For custom alertscripts, see [Custom alertscripts](https://www.zabbix.com/documentation/2.4/manual/config/notifications/media/script)
 * Administration > Users, Users, "Media" tab: set up notification destinations
 
-TODO
-----
-
-* Create a way to set up and update alertscripts: `/etc/zabbix/alert.d/`. Git? Download? Update?

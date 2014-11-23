@@ -1,7 +1,7 @@
 <?php
 global $DB;
 
-$DB['TYPE']     = 'MYSQL';
+$DB['TYPE']     = 'POSTGRESQL';
 $DB['DATABASE'] = '{{ ZABBIX_DB_NAME }}';
 $DB['USER']     = '{{ ZABBIX_DB_USER }}';
 $DB['PASSWORD'] = '{{ ZABBIX_DB_PASS }}';
