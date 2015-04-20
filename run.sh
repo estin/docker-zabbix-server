@@ -18,21 +18,16 @@ fi
 j2 /root/conf/zabbix.conf.php > /etc/zabbix/zabbix.conf.php
 j2 /root/conf/zabbix_server.conf > /etc/zabbix/zabbix_server.conf
 
-# Service commands
-[ $# -eq 1 ] &&
-    case "$1" in
-        # Install tables into MySQL
-        setup-db)
-            apt-get install -qq -y --no-install-recommends postgresql-client
-            zcat /usr/share/zabbix-server-pgsql/{schema,images,data}.sql.gz | PGPASSWORD=$ZABBIX_DB_PASS psql -h $ZABBIX_DB_HOST -U $ZABBIX_DB_USER $ZABBIX_DB_NAME
-            apt-get purge -qq -y postgresql-client postgresql-client-common
-            exit 0
-            ;;
-    esac
+# Setup database if needed
+if [ -z `PGPASSWORD=$ZABBIX_DB_PASS psql -h $ZABBIX_DB_HOST -U $ZABBIX_DB_USER -d postgres -c "select datname from pg_catalog.pg_database;" | grep -w $ZABBIX_DB_NAME` ] ; then
+    echo "Setup database"
+    PGPASSWORD=$ZABBIX_DB_PASS psql -h $ZABBIX_DB_HOST -U $ZABBIX_DB_USER -d postgres -c "create database $ZABBIX_DB_NAME owner $ZABBIX_DB_USER"
+    zcat /usr/share/zabbix-server-pgsql/{schema,images,data}.sql.gz | PGPASSWORD=$ZABBIX_DB_PASS psql -h $ZABBIX_DB_HOST -U $ZABBIX_DB_USER -d $ZABBIX_DB_NAME
+fi
 
 # Logging - uncomment if you want scrolling logs (and you should omit '-d' when running the container):
-#LOGFILES=$(echo /var/log/{nginx/error,nginx/http.error,php5-fpm,supervisord,zabbix-server/zabbix_server}.log)
-#( umask 0 && truncate -s0 $LOGFILES ) && tail --pid $$ -n0 -F $LOGFILES &
+LOGFILES=$(echo /var/log/{nginx/error,nginx/http.error,php5-fpm,supervisord,zabbix-server/zabbix_server}.log)
+( umask 0 && truncate -s0 $LOGFILES ) && tail --pid $$ -n0 -F $LOGFILES &
 
 # Launch
 rm -f /var/run/{nginx,php5-fpm,zabbix/zabbix_server}.pid

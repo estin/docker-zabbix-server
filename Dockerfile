@@ -1,7 +1,7 @@
 # Based on the work of "Mark Vartanyan <kolypto@gmail.com>": https://github.com/kolypto/docker-zabbix-server
-# Using LTS ubuntu
-FROM ubuntu:trusty
-MAINTAINER Uri Savelchev <alterrebe@gmail.com>
+# and of "Uri Savelchev <alterrebe@gmail.com>": https://github.com/alterrebe/docker-zabbix-server
+FROM ubuntu:14.04
+MAINTAINER Evgeniy Tatarkin <tatarkin.evg@gmail.com>
 
 # Ignore APT warnings about not having a TTY
 ENV DEBIAN_FRONTEND noninteractive
@@ -14,10 +14,20 @@ RUN dpkg-reconfigure locales
 
 # Packages: update & install
 RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty multiverse" > /etc/apt/sources.list.d/multiverse.list && \
-    echo "deb http://archive.ubuntu.com/ubuntu/ trusty-updates multiverse" >> /etc/apt/sources.list.d/multiverse.list && \
-    apt-get update -qq
-RUN apt-get install -qq -y --no-install-recommends python-pip supervisor htop
-RUN apt-get install -qq -y --no-install-recommends nginx-full php5-fpm php5-pgsql zabbix-server-pgsql zabbix-frontend-php snmp-mibs-downloader
+    echo "deb http://archive.ubuntu.com/ubuntu/ trusty-updates multiverse" >> /etc/apt/sources.list.d/multiverse.list
+
+RUN apt-get update -qq && apt-get install -qq -y --no-install-recommends \
+    zabbix-server-pgsql \
+    zabbix-frontend-php \
+    snmp-mibs-downloader \
+    python-pip \
+    supervisor \
+    nginx-full \
+    php5-fpm \
+    php5-pgsql \
+    htop \
+    postgresql-client
+
 RUN pip install j2cli
 
 # Const

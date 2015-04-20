@@ -51,13 +51,9 @@ Launch PostgreSQL database container with name 'zabbix-db'. Create the necessary
     postgres=# Ctrl-D
     ...$ Ctrl-D
 
-Install the required tables:
-
-    $ docker run --rm --link zabbix-db:db -e ZABBIX_DB_LINK=DB_PORT_5432 alterrebe/zabbix-server /root/run.sh setup-db
-
 Launch Zabbix container:
 
-    $ docker run -d --name="zabbix" --link zabbix-db:db -e ZABBIX_DB_LINK=DB_PORT_5432 -p 80:80 -p 10051:10051 alterrebe/zabbix-server
+    $ docker run -d --name="zabbix" --link zabbix-db:db -e ZABBIX_DB_LINK=DB_PORT_5432 -p 80:80 -p 10051:10051 estin/zabbix-server
 
 By default, you sign in as Admin:zabbix.
 
@@ -71,4 +67,3 @@ Things to do at the beginning:
 * Administration > Users, Users: disable guest access (group), setup user accounts & themes
 * Administration > Media types: set up notification methods. For custom alertscripts, see [Custom alertscripts](https://www.zabbix.com/documentation/2.4/manual/config/notifications/media/script)
 * Administration > Users, Users, "Media" tab: set up notification destinations
-
